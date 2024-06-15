@@ -1,0 +1,13 @@
+.leaflet-container {
+  height: 95vh;
+  width: 100wh;
+}
+
+.selectTime {
+  height: 5vh;
+  padding-top: 1.5vh;
+}
+
+select {
+  height: 2vh;
+}
