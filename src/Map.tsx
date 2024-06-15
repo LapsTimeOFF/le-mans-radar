@@ -1,8 +1,8 @@
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, GeoJSON } from "react-leaflet";
 import { type Map, Radar, WeatherMaps } from "./types";
-import { JSONTree } from "react-json-tree";
+// import { JSONTree } from "react-json-tree";
 
 const geojsonfeature = {
   id: "track",
