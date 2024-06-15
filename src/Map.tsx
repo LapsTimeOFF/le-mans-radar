@@ -1,7 +1,15 @@
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, GeoJSON } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  GeoJSON,
+  FeatureGroup,
+} from "react-leaflet";
 import { type Map, Radar, WeatherMaps } from "./types";
+import { EditControl } from "react-leaflet-draw";
 // import { JSONTree } from "react-json-tree";
 
 const geojsonfeature = {
@@ -297,6 +305,15 @@ export default function Map() {
 
         {/* @ts-expect-error the types are ass */}
         <GeoJSON data={geojsonfeature} />
+
+        <FeatureGroup>
+          <EditControl
+            position="topright"
+            draw={{
+              rectangle: true,
+            }}
+          />
+        </FeatureGroup>
       </MapContainer>
 
       {/* <JSONTree data={weatherMaps} /> */}
