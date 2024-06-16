@@ -8,10 +8,12 @@ import {
   GeoJSON,
   FeatureGroup,
   useMapEvents,
+  Polyline,
 } from "react-leaflet";
 import { type Map, Radar, WeatherMaps } from "./types";
 import { EditControl } from "react-leaflet-draw";
 import { geojsonfeature } from "./data";
+import { LatLngLiteral } from "leaflet";
 // import { JSONTree } from "react-json-tree";
 
 const getMostRecentWeatherMap = async (): Promise<{
@@ -109,6 +111,42 @@ function calculateSpeed(distanceKm: number, timeMinutes: number): number {
 
   return speedKph;
 }
+
+interface InfiniteLineProps {
+  point1: LatLngLiteral;
+  point2: LatLngLiteral;
+}
+
+const InfiniteLine: React.FC<InfiniteLineProps> = ({ point1, point2 }) => {
+  const [lineLatLngs, setLineLatLngs] = useState<LatLngLiteral[]>([]);
+
+  useEffect(() => {
+    const calculateInfiniteLine = () => {
+      // Calculate slope and intercept
+      const slope = (point2.lng - point1.lng) / (point2.lat - point1.lat);
+      const intercept = point1.lng - slope * point1.lat;
+
+      // Extend the line beyond point1
+      const extendFactor = 1; // Adjust for the length of the line
+
+      // Calculate points far beyond map bounds
+      const p1Extended = {
+        lat: point1.lat - extendFactor,
+        lng: slope * (point1.lat - extendFactor) + intercept,
+      };
+      const p2Extended = {
+        lat: point1.lat + extendFactor,
+        lng: slope * (point1.lat + extendFactor) + intercept,
+      };
+
+      return [p1Extended, p2Extended];
+    };
+
+    setLineLatLngs(calculateInfiniteLine());
+  }, [point1, point2]);
+
+  return <Polyline positions={lineLatLngs} />;
+};
 
 export default function Map() {
   const [mapPath, setMapPath] = useState<string | null>(null);
@@ -254,6 +292,13 @@ export default function Map() {
               Impact position ({moment(impactTime * 1000).format("LLL")})
             </Popup>
           </Marker>
+        )}
+
+        {startLatLong && endLatLong && (
+          <InfiniteLine
+            point1={{ lat: startLatLong[0], lng: startLatLong[1] }}
+            point2={{ lat: endLatLong[0], lng: endLatLong[1] }}
+          />
         )}
       </MapContainer>
 
