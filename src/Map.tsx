@@ -9,8 +9,9 @@ import {
   FeatureGroup,
   useMapEvents,
   Polyline,
+  Circle,
 } from "react-leaflet";
-import { type Map, Radar, WeatherMaps } from "./types";
+import { type Map, Position, Radar, WeatherMaps } from "./types";
 import { EditControl } from "react-leaflet-draw";
 import { geojsonfeature } from "./data";
 import { LatLngLiteral } from "leaflet";
@@ -160,6 +161,54 @@ export default function Map() {
 
   const [impactTime, setImpactTime] = useState<number | null>(null);
 
+  const [positions, setPositions] = useState<Position[]>([]);
+
+  useEffect(() => {
+    const ws = new WebSocket("wss://live-timing-api.sportall.tv/graphql", [
+      "graphql-transport-ws",
+    ]);
+
+    ws.onopen = function () {
+      console.log("Connected to websocket");
+
+      // Init connection
+      ws.send(
+        JSON.stringify({ type: "connection_init", payload: { locale: "en" } })
+      );
+    };
+
+    ws.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+
+      if (data.type === "connection_ack") {
+        console.log("Connection ack");
+
+        ws.send(
+          JSON.stringify({
+            id: "59cedfcc-d219-4b13-904e-1d72136da514",
+            type: "subscribe",
+            payload: {
+              variables: { sessionId: "7317", filters: {} },
+              extensions: {},
+              operationName: "Positions",
+              query:
+                "subscription Positions($sessionId: ID!, $filters: SessionParticipantsFilters) {\n  positions(sessionId: $sessionId, filters: $filters) {\n    ...Position\n    __typename\n  }\n}\n\nfragment Position on Position {\n  participantNumber\n  latitude\n  longitude\n  isInPit\n  isRetired\n  isOfficialCar\n  participant {\n    id\n    category {\n      id\n      color\n      __typename\n    }\n    __typename\n  }\n  __typename\n}",
+            },
+          })
+        );
+      }
+
+      if (data.id === "59cedfcc-d219-4b13-904e-1d72136da514") {
+        setPositions(data.payload.data.positions);
+        console.log(JSON.stringify(data.payload.data.positions[0]));
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
   useEffect(() => {
     if (startLatLong && endLatLong) {
       const distance = calculateDistance(startLatLong, endLatLong);
@@ -297,6 +346,16 @@ export default function Map() {
             point2={{ lat: endLatLong[0], lng: endLatLong[1] }}
           />
         )}
+
+        {positions.map((position) => (
+          <Circle
+            center={[position.latitude, position.longitude]}
+            radius={50}
+            color={position.participant.category.color}
+          >
+            <Popup>#{position.participantNumber}</Popup>
+          </Circle>
+        ))}
       </MapContainer>
 
       {/* <JSONTree data={weatherMaps} /> */}

@@ -24,3 +24,26 @@ export interface Infrared {
   time: number;
   path: string;
 }
+
+export interface Position {
+  participantNumber: string;
+  latitude: number;
+  longitude: number;
+  isInPit: boolean;
+  isRetired: boolean;
+  isOfficialCar: boolean;
+  participant: Participant;
+  __typename: string;
+}
+
+export interface Participant {
+  id: string;
+  category: Category;
+  __typename: string;
+}
+
+export interface Category {
+  id: string;
+  color: string;
+  __typename: string;
+}
