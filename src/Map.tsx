@@ -46,14 +46,12 @@ const MapEvent = ({
   setImpactLatLong,
   startLatLong,
   endLatLong,
-  impactLatLong,
 }: {
   setStartLatLong: (latLong: [number, number]) => void;
   setEndLatLong: (latLong: [number, number]) => void;
   setImpactLatLong: (latLong: [number, number]) => void;
   startLatLong: [number, number] | null | undefined;
   endLatLong: [number, number] | null | undefined;
-  impactLatLong: [number, number] | null | undefined;
 }) => {
   useMapEvents({
     click(e) {
@@ -61,7 +59,7 @@ const MapEvent = ({
         setStartLatLong([e.latlng.lat, e.latlng.lng]);
       } else if (!endLatLong) {
         setEndLatLong([e.latlng.lat, e.latlng.lng]);
-      } else if (!impactLatLong) {
+      } else {
         setImpactLatLong([e.latlng.lat, e.latlng.lng]);
       }
     },
@@ -268,7 +266,6 @@ export default function Map() {
         <MapEvent
           endLatLong={endLatLong}
           startLatLong={startLatLong}
-          impactLatLong={impactLatLong}
           setImpactLatLong={setImpactLatLong}
           setStartLatLong={setStartLatLong}
           setEndLatLong={setEndLatLong}
